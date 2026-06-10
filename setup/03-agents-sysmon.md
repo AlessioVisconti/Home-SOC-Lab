@@ -47,31 +47,57 @@ sudo systemctl status wazuh-agent
 ```
 Should show `active (running)`.
  
-Check the Wazuh dashboard → **Agents Summary**: the agent `ubuntu-victim` should
+Check the Wazuh dashboard → **Endpoints**: the agent `ubuntu-victim` should
 appear as **Active**.
  
 ---
  
 ## Windows-Victim agent
  
-> ⏳ To be completed
- 
-### VM Specs (planned)
+### VM Specs
  
 | Field | Value |
 |-------|-------|
 | Name | Windows-Victim |
-| OS | Windows 11 64-bit |
+| OS | Windows 11 Pro 64-bit |
 | RAM | 4096 MB |
 | CPU | 2 |
 | Disk | 50 GB |
-| Network | NAT Network — SOC-Lab-Net — TBD |
+| Network | NAT Network — SOC-Lab-Net |
  
-### Steps (planned)
-1. Download the Wazuh agent MSI installer from the dashboard
-2. Run with `WAZUH_MANAGER=10.0.0.5` parameter
-3. Install **Sysmon** with the SwiftOnSecurity config for rich telemetry
-4. Verify the agent appears in the dashboard
+### Notes on installation
+ 
+Windows-Victim runs on an isolated internal network (SOC-Lab-Net) with no internet access.
+The Wazuh agent MSI was downloaded on the host machine and transferred to the VM via
+VirtualBox drag-and-drop (Guest Additions required).
+ 
+The VM was installed without UEFI/Secure Boot (disabled in VirtualBox settings) and without
+a Microsoft account (local account created using the `oobe\bypassnro` workaround).
+TPM checks were bypassed during setup using the LabConfig registry keys:
+ 
+```
+reg add HKLM\SYSTEM\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f
+reg add HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f
+```
+ 
+### Install the agent
+ 
+1. Download `wazuh-agent-4.12.0-1.msi` from the host and drag it into the VM desktop.
+2. Open **PowerShell as Administrator** and run:
+```powershell
+msiexec.exe /i C:\Users\Alessio\Desktop\wazuh-agent-4.12.0-1.msi /q WAZUH_MANAGER='10.0.0.5' WAZUH_AGENT_NAME='windows-victim'
+```
+ 
+3. Start the service:
+```powershell
+NET START WazuhSvc
+```
+ 
+### Verify
+ 
+Check the Wazuh dashboard → **Endpoints**: the agent `windows-victim` (ID 002)
+should appear as **Active**.
+ 
 ---
  
 ## Sysmon (Windows only)
@@ -88,17 +114,25 @@ by the default Windows Event Log:
 | 12/13 | Registry changes |
 | 22 | DNS queries |
  
-### Install (planned)
+### Install
+ 
+Files downloaded on the host and transferred to the VM via drag-and-drop:
+- `Sysmon.zip` from [Sysinternals](https://download.sysinternals.com/files/Sysmon.zip)
+- `sysmonconfig-export.xml` from [SwiftOnSecurity](https://github.com/SwiftOnSecurity/sysmon-config)
 ```powershell
-# Download Sysmon
-Invoke-WebRequest -Uri https://download.sysinternals.com/files/Sysmon.zip -OutFile Sysmon.zip
-Expand-Archive Sysmon.zip
+# Extract
+Expand-Archive C:\Users\Alessio\Desktop\Sysmon.zip -DestinationPath C:\Users\Alessio\Desktop\Sysmon
  
-# Download SwiftOnSecurity config
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml -OutFile sysmonconfig.xml
+# Install with SwiftOnSecurity config
+C:\Users\Alessio\Desktop\Sysmon\Sysmon64.exe -accepteula -i C:\Users\Alessio\Desktop\sysmonconfig-export.xml
+```
  
-# Install
-.\Sysmon64.exe -accepteula -i sysmonconfig.xml
+Expected output:
+```
+Sysmon64 installed.
+SysmonDrv installed.
+SysmonDrv started.
+Sysmon64 started.
 ```
  
 ---
@@ -108,7 +142,7 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-
 | VM | Agent installed | Status |
 |----|----------------|--------|
 | Ubuntu-Victim (10.0.0.6) | ✅ | Active |
-| Windows-Victim | 🔜 Planned | — |
+| Windows-Victim | ✅ + Sysmon | Active |
  
 <br>
 ---
@@ -158,31 +192,57 @@ sudo systemctl status wazuh-agent
 ```
 Deve mostrare `active (running)`.
  
-Controlla nella dashboard Wazuh → **Agents Summary**: l'agent `ubuntu-victim` deve
+Controlla nella dashboard Wazuh → **Endpoints**: l'agent `ubuntu-victim` deve
 apparire come **Active**.
  
 ---
  
 ## Agent su Windows-Victim
  
-> ⏳ Da completare
- 
-### Specifiche della VM (pianificate)
+### Specifiche della VM
  
 | Campo | Valore |
 |-------|--------|
 | Nome | Windows-Victim |
-| OS | Windows 11 64-bit |
+| OS | Windows 11 Pro 64-bit |
 | RAM | 4096 MB |
 | CPU | 2 |
 | Disco | 50 GB |
-| Rete | NAT Network — SOC-Lab-Net — TBD |
+| Rete | NAT Network — SOC-Lab-Net |
  
-### Passaggi (pianificati)
-1. Scaricare l'installer MSI dell'agent Wazuh dalla dashboard
-2. Eseguirlo con il parametro `WAZUH_MANAGER=10.0.0.5`
-3. Installare **Sysmon** con la config di SwiftOnSecurity per telemetria ricca
-4. Verificare che l'agent appaia nella dashboard
+### Note sull'installazione
+ 
+Windows-Victim gira sulla rete interna isolata (SOC-Lab-Net) senza accesso a internet.
+L'MSI dell'agent Wazuh è stato scaricato sul PC host e trasferito nella VM tramite
+drag-and-drop di VirtualBox (richiede le Guest Additions).
+ 
+La VM è stata installata senza UEFI/Secure Boot (disabilitati nelle impostazioni VirtualBox)
+e senza account Microsoft (account locale creato tramite il workaround `oobe\bypassnro`).
+I controlli TPM sono stati bypassati durante il setup tramite le chiavi di registro LabConfig:
+ 
+```
+reg add HKLM\SYSTEM\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f
+reg add HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f
+```
+ 
+### Installazione agent
+ 
+1. Scaricare `wazuh-agent-4.12.0-1.msi` dall'host e trascinarlo sul desktop della VM.
+2. Aprire **PowerShell come Amministratore** e lanciare:
+```powershell
+msiexec.exe /i C:\Users\Alessio\Desktop\wazuh-agent-4.12.0-1.msi /q WAZUH_MANAGER='10.0.0.5' WAZUH_AGENT_NAME='windows-victim'
+```
+ 
+3. Avviare il servizio:
+```powershell
+NET START WazuhSvc
+```
+ 
+### Verifica
+ 
+Controlla nella dashboard Wazuh → **Endpoints**: l'agent `windows-victim` (ID 002)
+deve apparire come **Active**.
+ 
 ---
  
 ## Sysmon (solo Windows)
@@ -199,17 +259,25 @@ dal Windows Event Log predefinito:
 | 12/13 | Modifiche al registro |
 | 22 | Query DNS |
  
-### Installazione (pianificata)
+### Installazione
+ 
+File scaricati sull'host e trasferiti nella VM tramite drag-and-drop:
+- `Sysmon.zip` da [Sysinternals](https://download.sysinternals.com/files/Sysmon.zip)
+- `sysmonconfig-export.xml` da [SwiftOnSecurity](https://github.com/SwiftOnSecurity/sysmon-config)
 ```powershell
-# Download Sysmon
-Invoke-WebRequest -Uri https://download.sysinternals.com/files/Sysmon.zip -OutFile Sysmon.zip
-Expand-Archive Sysmon.zip
+# Estrazione
+Expand-Archive C:\Users\Alessio\Desktop\Sysmon.zip -DestinationPath C:\Users\Alessio\Desktop\Sysmon
  
-# Download config SwiftOnSecurity
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml -OutFile sysmonconfig.xml
+# Installazione con config SwiftOnSecurity
+C:\Users\Alessio\Desktop\Sysmon\Sysmon64.exe -accepteula -i C:\Users\Alessio\Desktop\sysmonconfig-export.xml
+```
  
-# Installazione
-.\Sysmon64.exe -accepteula -i sysmonconfig.xml
+Output atteso:
+```
+Sysmon64 installed.
+SysmonDrv installed.
+SysmonDrv started.
+Sysmon64 started.
 ```
  
 ---
@@ -219,4 +287,4 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-
 | VM | Agent installato | Stato |
 |----|-----------------|-------|
 | Ubuntu-Victim (10.0.0.6) | ✅ | Attivo |
-| Windows-Victim | 🔜 Pianificato | — |
+| Windows-Victim | ✅ + Sysmon | Attivo |
