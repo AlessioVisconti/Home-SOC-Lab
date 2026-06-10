@@ -35,7 +35,7 @@ graph TD
     subgraph HOST["💻 Windows Laptop — 32 GB RAM / VirtualBox"]
         subgraph NET["🔒 Isolated Internal Network — 10.0.0.0/24"]
             KALI["🐉 Kali Linux<br/>Attacker<br/>10.0.0.10"]
-            WIN["🪟 Windows 10<br/>Victim + Sysmon<br/>10.0.0.20"]
+            WIN["🪟 Windows 11<br/>Victim + Sysmon<br/>10.0.0.20"]
             UBU["🐧 Ubuntu Server<br/>Victim<br/>10.0.0.30"]
             WAZUH["🛡️ Wazuh<br/>SIEM / XDR + Dashboard<br/>10.0.0.5"]
         end
@@ -52,7 +52,7 @@ graph TD
 | Role | Machine | RAM | Purpose |
 |------|---------|-----|---------|
 | SIEM / XDR | Wazuh (single-node) | ~6 GB | Log collection, correlation, alerting, dashboards |
-| Victim | Windows 10 + **Sysmon** | 4 GB | Endpoint telemetry, process/PowerShell logging |
+| Victim | Windows 11 + **Sysmon** | 4 GB | Endpoint telemetry, process/PowerShell logging |
 | Victim | Ubuntu Server | 2 GB | Linux logs, SSH brute-force target |
 | Attacker | Kali Linux | 4 GB | Offensive tooling to generate detections |
  
@@ -144,7 +144,7 @@ graph TD
     subgraph HOST_IT["💻 Portatile Windows — 32 GB RAM / VirtualBox"]
         subgraph NET_IT["🔒 Rete Interna Isolata — 10.0.0.0/24"]
             KALI_IT["🐉 Kali Linux<br/>Attaccante<br/>10.0.0.10"]
-            WIN_IT["🪟 Windows 10<br/>Vittima + Sysmon<br/>10.0.0.20"]
+            WIN_IT["🪟 Windows 11<br/>Vittima + Sysmon<br/>10.0.0.20"]
             UBU_IT["🐧 Ubuntu Server<br/>Vittima<br/>10.0.0.30"]
             WAZUH_IT["🛡️ Wazuh<br/>SIEM / XDR + Dashboard<br/>10.0.0.5"]
         end
@@ -161,7 +161,7 @@ graph TD
 | Ruolo | Macchina | RAM | Scopo |
 |-------|----------|-----|-------|
 | SIEM / XDR | Wazuh (single-node) | ~6 GB | Raccolta log, correlazione, alerting, dashboard |
-| Vittima | Windows 10 + **Sysmon** | 4 GB | Telemetria endpoint, logging processi/PowerShell |
+| Vittima | Windows 11 + **Sysmon** | 4 GB | Telemetria endpoint, logging processi/PowerShell |
 | Vittima | Ubuntu Server | 2 GB | Log Linux, bersaglio per brute-force SSH |
 | Attaccante | Kali Linux | 4 GB | Strumenti offensivi per generare le detection |
  
